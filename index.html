@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cartas para Chola</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Karla:wght@400;500;700&family=Caveat:wght@500&display=swap">
+<style>
+/* Layout: una pila de sobres sobre un cielo de amanecer; cada sobre abre una carta a pantalla completa */
+:root {
+  --sky: #E9EEF5;
+  --sky-2: #F6E9E4;
+  --paper: #FFFDFA;
+  --ink: #23304A;
+  --ink-soft: #5C6782;
+  --rose: #C9706A;
+  --gold: #B88A3E;
+  --line: #D8DEEA;
+  --env: #F3E3D6;
+  --env-flap: #E8CDBA;
+  --display: "Gloock", Georgia, "Times New Roman", serif;
+  --body: "Karla", "Segoe UI", system-ui, sans-serif;
+  --hand: "Caveat", "Segoe Print", cursive;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --sky: #161C2B; --sky-2: #2A2232; --paper: #1F2638; --ink: #EEF0F6; --ink-soft: #A8AFC4;
+  --rose: #E49A92; --gold: #D9B36E; --line: #343C52; --env: #3A2F3A; --env-flap: #4A3B45; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --sky: #161C2B; --sky-2: #2A2232; --paper: #1F2638; --ink: #EEF0F6; --ink-soft: #A8AFC4;
+  --rose: #E49A92; --gold: #D9B36E; --line: #343C52; --env: #3A2F3A; --env-flap: #4A3B45; color-scheme: dark }
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: linear-gradient(170deg, var(--sky) 0%, var(--sky) 45%, var(--sky-2) 100%) fixed, var(--sky);
+  color: var(--ink);
+  font: 400 17px/1.6 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 560px; margin: 0 auto; display: grid; gap: 28px; }
+
+header { display: grid; gap: 10px; text-align: left; padding-top: 12px; }
+.eyebrow { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--rose); font-weight: 700; }
+h1 { font: 400 clamp(40px, 11vw, 60px)/1.02 var(--display); margin: 0; text-wrap: balance; }
+h1 em { font-style: normal; color: var(--rose); }
+.lede { color: var(--ink-soft); margin: 0; max-width: 34ch; }
+.age { font: 400 15px/1 var(--body); color: var(--gold); display: flex; align-items: center; gap: 10px; }
+.age b { font: 400 34px/1 var(--display); }
+
+.list { display: grid; gap: 14px; }
+.env {
+  position: relative; display: grid; grid-template-columns: 56px 1fr auto; align-items: center; gap: 14px;
+  width: 100%; text-align: left; cursor: pointer; border: 0; font: inherit; color: inherit;
+  background: var(--env); border-radius: 6px; padding: 16px 18px; overflow: hidden;
+  box-shadow: 0 1px 0 var(--line), 0 6px 18px -12px rgba(35,48,74,.45);
+  transition: transform .2s ease;
+}
+.env:hover { transform: translateY(-2px); }
+.env:focus-visible { outline: 3px solid var(--rose); outline-offset: 3px; }
+.env .seal {
+  width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--rose); color: var(--paper); font: 400 20px/1 var(--display);
+}
+.env.opened .seal { background: transparent; border: 1.5px solid var(--rose); color: var(--rose); }
+.env .k { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+.env .t { font: 400 20px/1.25 var(--display); display: block; min-width: 0; }
+.env .st { font-size: 13px; color: var(--ink-soft); white-space: nowrap; }
+.env.feature { background: var(--paper); border: 1.5px solid var(--gold); padding-block: 22px; }
+.env.feature .seal { background: var(--gold); }
+.env.feature.opened .seal { background: transparent; border-color: var(--gold); color: var(--gold); }
+.env::before { /* solapa del sobre */
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 50%;
+  background: linear-gradient(to bottom right, transparent 49.5%, var(--env-flap) 50%) left/50% 100% no-repeat,
+              linear-gradient(to bottom left, transparent 49.5%, var(--env-flap) 50%) right/50% 100% no-repeat;
+  opacity: .35; pointer-events: none; transform: scaleY(-1);
+}
+.env.feature::before { display: none; }
+
+footer { color: var(--ink-soft); font-size: 13px; text-align: center; }
+
+/* Carta abierta */
+.letter-view { position: fixed; inset: 0; z-index: 20; overflow-y: auto; background: var(--sky);
+  padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.letter-view .inner { max-width: 560px; margin: 0 auto; display: grid; gap: 18px; }
+.back { justify-self: start; background: none; border: 0; color: var(--ink-soft); font: 500 15px var(--body); cursor: pointer; padding: 8px 0; }
+.back:focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; }
+.paper {
+  background: var(--paper); border-radius: 4px; padding: 30px 24px 34px;
+  box-shadow: 0 14px 40px -24px rgba(35,48,74,.6);
+  display: grid; gap: 18px;
+  animation: rise .45s ease both;
+}
+@keyframes rise { from { transform: translateY(24px); opacity: .4; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .paper { animation: none; } .env { transition: none; } }
+.paper .k { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--rose); font-weight: 700; }
+.paper h2 { font: 400 clamp(28px, 7.5vw, 36px)/1.15 var(--display); margin: 0; text-wrap: balance; }
+.msg { white-space: pre-line; margin: 0; }
+.msg.placeholder { color: var(--ink-soft); font-style: italic; border: 1.5px dashed var(--line); padding: 14px; border-radius: 4px; }
+.verse { margin: 4px 0 0; display: grid; gap: 8px; }
+.verse p { margin: 0; font: 400 19px/1.55 var(--display); white-space: pre-line; color: var(--ink); }
+.verse cite { font-style: normal; font-size: 13px; letter-spacing: .08em; color: var(--gold); text-transform: uppercase; font-weight: 700; }
+.sign { font: 500 30px/1 var(--hand); color: var(--rose); justify-self: end; }
+</style>
+
+<div class="wrap" id="home">
+  <header>
+    <span class="eyebrow">30 de octubre</span>
+    <h1>Feliz cumpleaños, <em>Chola</em></h1>
+    <div class="age"><b>20</b> años · seis cartas para abrir cuando las necesites</div>
+    <p class="lede">Empieza por la de hoy. Las demás guárdalas para cuando llegue su momento.</p>
+  </header>
+  <div class="list" id="list"></div>
+  <footer>De Marcos, con cariño. Te quiero mucho.</footer>
+</div>
+
+<section class="letter-view" id="view" hidden aria-modal="true" role="dialog" aria-labelledby="vt">
+  <div class="inner">
+    <button class="back" id="back">← Volver a las cartas</button>
+    <article class="paper">
+      <span class="k" id="vk"></span>
+      <h2 id="vt"></h2>
+      <div class="verse">
+        <p id="vv"></p>
+        <cite id="vc"></cite>
+      </div>
+      <span class="sign">Marcos</span>
+    </article>
+  </div>
+</section>
+
+<script>
+// Para añadir o cambiar cartas: edita esta lista. "texto" vacío muestra un aviso de borrador.
+const CARTAS = [
+  { id: "cumple", cuando: "Hoy", titulo: "Ábrelo en tu cumpleaños", destacada: true,
+    texto: "",
+    versiculo: "Que Dios te bendiga\ny siempre te cuide;\nque Dios te mire con agrado\ny te muestre su bondad;\nque Dios te mire con agrado\ny te llene de paz.",
+    cita: "Números 6:24-26 · TLA" },
+  { id: "futuro", cuando: "Ábrelo cuando…", titulo: "el futuro te agobie",
+    texto: "",
+    versiculo: "Así que no se preocupen por lo que pasará mañana. Ya tendrán tiempo para eso. Recuerden que ya tenemos bastante con los problemas de cada día.",
+    cita: "Mateo 6:34 · TLA" },
+  { id: "ganas", cuando: "Ábrelo cuando…", titulo: "no tengas ganas de nada",
+    texto: "",
+    versiculo: "Ustedes viven siempre angustiados y preocupados. Vengan a mí, y yo los haré descansar.",
+    cita: "Mateo 11:28 · TLA" },
+  { id: "hablar", cuando: "Ábrelo cuando…", titulo: "necesites hablar con alguien",
+    texto: "",
+    versiculo: "El amigo siempre es amigo,\ny en los tiempos difíciles\nes más que un hermano.",
+    cita: "Proverbios 17:17 · TLA" },
+  { id: "reir", cuando: "Ábrelo cuando…", titulo: "necesites reírte",
+    texto: "",
+    versiculo: "No hay mejor medicina\nque tener pensamientos alegres.\nCuando se pierde el ánimo,\ntodo el cuerpo se enferma.",
+    cita: "Proverbios 17:22 · TLA" },
+  { id: "avanzar", cuando: "Ábrelo cuando…", titulo: "creas que no avanzas",
+    texto: "",
+    versiculo: "Dios empezó el buen trabajo en ustedes, y estoy seguro de que lo irá perfeccionando hasta el día en que Jesucristo vuelva.",
+    cita: "Filipenses 1:6 · TLA" }
+];
+
+const KEY = "cartas-chola-abiertas";
+let abiertas = [];
+try { abiertas = JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { abiertas = []; }
+function guardar() { try { localStorage.setItem(KEY, JSON.stringify(abiertas)); } catch (e) {} }
+
+const list = document.getElementById("list");
+function pintar() {
+  list.innerHTML = "";
+  CARTAS.forEach((c, i) => {
+    const b = document.createElement("button");
+    const abierta = abiertas.includes(c.id);
+    b.className = "env" + (c.destacada ? " feature" : "") + (abierta ? " opened" : "");
+    b.innerHTML = `<span class="seal">${c.destacada ? "♥" : i}</span>
+      <span style="min-width:0"><span class="k">${c.cuando}</span><span class="t">${c.titulo}</span></span>
+      <span class="st">${abierta ? "Abierta" : "Sin abrir"}</span>`;
+    b.addEventListener("click", () => abrir(c));
+    list.appendChild(b);
+  });
+}
+
+const view = document.getElementById("view");
+let ultimo = null;
+function abrir(c) {
+  ultimo = document.activeElement;
+  document.getElementById("vk").textContent = c.cuando;
+  document.getElementById("vt").textContent = c.titulo.charAt(0).toUpperCase() + c.titulo.slice(1);
+  document.getElementById("vv").textContent = c.versiculo;
+  document.getElementById("vc").textContent = c.cita;
+  view.hidden = false; view.scrollTop = 0;
+  document.getElementById("home").setAttribute("aria-hidden", "true");
+  document.getElementById("back").focus();
+  if (!abiertas.includes(c.id)) { abiertas.push(c.id); guardar(); }
+}
+function cerrar() {
+  view.hidden = true;
+  document.getElementById("home").removeAttribute("aria-hidden");
+  pintar();
+  if (ultimo) { const i = [...document.querySelectorAll(".env")]; (i.find(x => x.textContent === ultimo.textContent) || i[0]).focus(); }
+}
+document.getElementById("back").addEventListener("click", cerrar);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !view.hidden) cerrar(); });
+pintar();
+</script>
+
+</html>
